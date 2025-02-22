@@ -1,1055 +1,243 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>HAUNTED — Paranormal Event Registry</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=Bebas+Neue&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --ink: #1a1208;
-    --paper: #e8dfc8;
-    --paper-dark: #d4c8a8;
-    --paper-darker: #b8a880;
-    --red: #8b1a1a;
-    --red-stamp: #a01515;
-    --amber: #c8860a;
-    --faded: #6b5e42;
-    --ghost: rgba(26,18,8,0.06);
-    --scanline: rgba(0,0,0,0.03);
-  }
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  body {
-    background: #0d0b07;
-    font-family: 'Courier Prime', monospace;
-    color: var(--ink);
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-
-  /* ── Film grain overlay ── */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E");
-    opacity: 0.04;
-    pointer-events: none;
-    z-index: 9999;
-  }
-
-  /* ── Header ── */
-  .site-header {
-    background: #0d0b07;
-    padding: 0;
-    border-bottom: 3px solid #2a2010;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-
-  .header-inner {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 18px 40px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .logo {
-    display: flex;
-    align-items: baseline;
-    gap: 14px;
-  }
-
-  .logo-main {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 2.6rem;
-    letter-spacing: 0.12em;
-    color: var(--paper);
-    text-shadow: 0 0 30px rgba(232,223,200,0.3);
-  }
-
-  .logo-sub {
-    font-family: 'Courier Prime', monospace;
-    font-size: 0.65rem;
-    color: var(--faded);
-    letter-spacing: 0.25em;
-    text-transform: uppercase;
-    opacity: 0.7;
-  }
-
-  .status-bar {
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    font-size: 0.7rem;
-    color: var(--faded);
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-  }
-
-  .status-dot {
-    width: 7px; height: 7px;
-    border-radius: 50%;
-    background: #2d5a1e;
-    box-shadow: 0 0 8px #4a9a30;
-    animation: pulse-green 2.5s ease-in-out infinite;
-  }
-
-  @keyframes pulse-green {
-    0%, 100% { opacity: 1; box-shadow: 0 0 8px #4a9a30; }
-    50% { opacity: 0.5; box-shadow: 0 0 3px #4a9a30; }
-  }
-
-  /* ── Page wrapper (paper texture) ── */
-  .page {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 40px;
-  }
-
-  /* ── CLASSIFIED banner ── */
-  .classified-banner {
-    background: var(--red-stamp);
-    color: var(--paper);
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 0.85rem;
-    letter-spacing: 0.5em;
-    text-align: center;
-    padding: 7px 0;
-    margin-bottom: 40px;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .classified-banner::before,
-  .classified-banner::after {
-    content: '█ CLASSIFIED █ CLASSIFIED █ CLASSIFIED █ CLASSIFIED █ CLASSIFIED █ CLASSIFIED █ CLASSIFIED █ CLASSIFIED █';
-    position: absolute;
-    white-space: nowrap;
-    opacity: 0.15;
-    font-size: 0.75rem;
-    letter-spacing: 0.2em;
-  }
-  .classified-banner::before { top: 2px; left: 0; animation: march 12s linear infinite; }
-  .classified-banner::after { bottom: 2px; right: 0; animation: march 12s linear infinite reverse; }
-
-  @keyframes march { from { transform: translateX(0); } to { transform: translateX(-50%); } }
-
-  /* ── Summary cards ── */
-  .summary-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 2px;
-    margin-bottom: 40px;
-  }
-
-  .stat-card {
-    background: var(--paper);
-    padding: 24px 20px;
-    position: relative;
-    overflow: hidden;
-    cursor: default;
-    transition: transform 0.15s;
-  }
-
-  .stat-card:hover { transform: translateY(-2px); }
-
-  .stat-card::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: repeating-linear-gradient(
-      0deg,
-      var(--scanline) 0px,
-      var(--scanline) 1px,
-      transparent 1px,
-      transparent 3px
-    );
-    pointer-events: none;
-  }
-
-  .stat-card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 3px;
-    background: var(--red-stamp);
-  }
-
-  .stat-label {
-    font-size: 0.6rem;
-    letter-spacing: 0.3em;
-    text-transform: uppercase;
-    color: var(--faded);
-    margin-bottom: 8px;
-  }
-
-  .stat-value {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 3rem;
-    color: var(--ink);
-    line-height: 1;
-    text-shadow: 2px 2px 0 var(--paper-dark);
-  }
-
-  .stat-value.danger { color: var(--red); }
-
-  /* ── Section headers ── */
-  .section-head {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    margin-bottom: 20px;
-    margin-top: 40px;
-  }
-
-  .section-title {
-    font-family: 'Special Elite', cursive;
-    font-size: 1.1rem;
-    color: var(--paper);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-  }
-
-  .section-line {
-    flex: 1;
-    height: 1px;
-    background: linear-gradient(to right, #3a3020, transparent);
-  }
-
-  /* ── Form / Generate panel ── */
-  .panel {
-    background: var(--paper);
-    padding: 32px;
-    margin-bottom: 2px;
-    position: relative;
-  }
-
-  .panel::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: repeating-linear-gradient(0deg, var(--scanline) 0px, var(--scanline) 1px, transparent 1px, transparent 3px);
-    pointer-events: none;
-  }
-
-  .form-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 20px;
-    margin-bottom: 24px;
-  }
-
-  .form-group { display: flex; flex-direction: column; gap: 6px; }
-
-  .form-label {
-    font-size: 0.6rem;
-    letter-spacing: 0.3em;
-    text-transform: uppercase;
-    color: var(--faded);
-  }
-
-  .form-input, .form-select {
-    background: var(--paper-dark);
-    border: 1px solid var(--paper-darker);
-    border-bottom: 2px solid var(--ink);
-    padding: 10px 12px;
-    font-family: 'Courier Prime', monospace;
-    font-size: 0.9rem;
-    color: var(--ink);
-    outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
-    appearance: none;
-  }
-
-  .form-input:focus, .form-select:focus {
-    border-color: var(--red);
-    box-shadow: 0 2px 0 var(--red);
-  }
-
-  .form-input::placeholder { color: var(--faded); opacity: 0.5; }
-
-  .scores-row {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 16px;
-    margin-bottom: 24px;
-  }
-
-  .score-group { display: flex; flex-direction: column; gap: 8px; }
-
-  .score-label {
-    font-size: 0.6rem;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--faded);
-  }
-
-  .score-slider {
-    -webkit-appearance: none;
-    width: 100%;
-    height: 3px;
-    background: var(--paper-darker);
-    outline: none;
-    cursor: pointer;
-  }
-
-  .score-slider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 14px; height: 14px;
-    background: var(--red-stamp);
-    border-radius: 0;
-    cursor: pointer;
-    transition: transform 0.1s;
-  }
-
-  .score-slider::-webkit-slider-thumb:hover { transform: scale(1.3); }
-
-  .score-display {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.2rem;
-    color: var(--ink);
-    text-align: center;
-  }
-
-  .btn-submit {
-    background: var(--red-stamp);
-    color: var(--paper);
-    border: none;
-    padding: 14px 40px;
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.1rem;
-    letter-spacing: 0.25em;
-    cursor: pointer;
-    position: relative;
-    overflow: hidden;
-    transition: background 0.2s;
-  }
-
-  .btn-submit:hover { background: #6b1010; }
-
-  .btn-submit::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.08) 50%, transparent 100%);
-    transform: translateX(-100%);
-    transition: transform 0.4s;
-  }
-  .btn-submit:hover::before { transform: translateX(100%); }
-
-  /* ── Events table ── */
-  .events-table {
-    width: 100%;
-    border-collapse: collapse;
-    background: var(--paper);
-  }
-
-  .events-table th {
-    background: var(--ink);
-    color: var(--paper);
-    font-family: 'Courier Prime', monospace;
-    font-size: 0.6rem;
-    letter-spacing: 0.3em;
-    text-transform: uppercase;
-    padding: 12px 16px;
-    text-align: left;
-    font-weight: 700;
-  }
-
-  .events-table td {
-    padding: 12px 16px;
-    font-size: 0.82rem;
-    border-bottom: 1px solid var(--paper-darker);
-    vertical-align: middle;
-  }
-
-  .events-table tr { transition: background 0.15s; }
-  .events-table tr:hover td { background: var(--paper-dark); }
-
-  /* ── Classification badges ── */
-  .badge {
-    display: inline-block;
-    padding: 3px 8px;
-    font-size: 0.58rem;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    font-weight: 700;
-    border: 1px solid currentColor;
-  }
-
-  .badge-poltergeist { color: #7a1a1a; border-color: #7a1a1a; background: #f5e8e8; }
-  .badge-apparition  { color: #1a3a7a; border-color: #1a3a7a; background: #e8eef5; }
-  .badge-electrical  { color: #7a5a0a; border-color: #7a5a0a; background: #f5f0e0; }
-  .badge-infrasound  { color: #1a5a3a; border-color: #1a5a3a; background: #e0f0e8; }
-  .badge-intelligent { color: #4a1a7a; border-color: #4a1a7a; background: #ede8f5; }
-  .badge-unknown     { color: #4a4a4a; border-color: #4a4a4a; background: #ebebeb; }
-  .badge-residual    { color: #5a3a1a; border-color: #5a3a1a; background: #f0e8e0; }
-
-  /* Threat level */
-  .threat {
-    display: inline-flex;
-    align-items: center;
-    gap: 3px;
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 0.95rem;
-  }
-  .threat-skull { opacity: 0.3; }
-  .threat-skull.lit { opacity: 1; color: var(--red); }
-
-  /* ── Moon phase tag ── */
-  .moon-tag {
-    font-size: 0.7rem;
-    color: var(--faded);
-    font-style: italic;
-  }
-
-  /* ── STAMP overlay ── */
-  .stamp {
-    display: inline-block;
-    border: 3px solid var(--red-stamp);
-    color: var(--red-stamp);
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 1.4rem;
-    letter-spacing: 0.3em;
-    padding: 4px 16px;
-    transform: rotate(-8deg);
-    opacity: 0.85;
-    pointer-events: none;
-    white-space: nowrap;
-  }
-
-  /* ── Locations grid ── */
-  .locations-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 2px;
-    margin-bottom: 40px;
-  }
-
-  .loc-card {
-    background: var(--paper);
-    padding: 20px;
-    position: relative;
-    overflow: hidden;
-    cursor: pointer;
-    transition: transform 0.15s;
-  }
-
-  .loc-card:hover { transform: scale(1.01); z-index: 2; }
-
-  .loc-card::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: repeating-linear-gradient(0deg, var(--scanline) 0px, var(--scanline) 1px, transparent 1px, transparent 3px);
-    pointer-events: none;
-  }
-
-  .loc-id {
-    font-size: 0.55rem;
-    letter-spacing: 0.3em;
-    color: var(--faded);
-    text-transform: uppercase;
-    margin-bottom: 6px;
-  }
-
-  .loc-name {
-    font-family: 'Special Elite', cursive;
-    font-size: 1rem;
-    color: var(--ink);
-    margin-bottom: 10px;
-    line-height: 1.3;
-  }
-
-  .loc-meta {
-    font-size: 0.7rem;
-    color: var(--faded);
-    display: flex;
-    gap: 14px;
-  }
-
-  .loc-threat-bar {
-    position: absolute;
-    bottom: 0; left: 0; right: 0;
-    height: 3px;
-    background: var(--paper-darker);
-  }
-
-  .loc-threat-fill {
-    height: 100%;
-    background: var(--red-stamp);
-    transition: width 0.8s ease;
-  }
-
-  /* ── Toast ── */
-  .toast-container {
-    position: fixed;
-    bottom: 30px;
-    right: 30px;
-    z-index: 9000;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .toast {
-    background: var(--ink);
-    color: var(--paper);
-    padding: 12px 20px;
-    font-family: 'Courier Prime', monospace;
-    font-size: 0.8rem;
-    border-left: 3px solid var(--red-stamp);
-    animation: slide-in 0.3s ease;
-    max-width: 320px;
-  }
-
-  .toast.success { border-left-color: #3a7a2a; }
-  .toast.error   { border-left-color: var(--red-stamp); }
-
-  @keyframes slide-in {
-    from { transform: translateX(40px); opacity: 0; }
-    to { transform: translateX(0); opacity: 1; }
-  }
-
-  /* ── Loader ── */
-  .loader {
-    display: inline-block;
-    width: 14px; height: 14px;
-    border: 2px solid var(--paper-darker);
-    border-top-color: var(--red-stamp);
-    border-radius: 50%;
-    animation: spin 0.7s linear infinite;
-    vertical-align: middle;
-    margin-right: 8px;
-  }
-
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  /* ── Empty state ── */
-  .empty {
-    text-align: center;
-    padding: 60px;
-    background: var(--paper);
-    color: var(--faded);
-    font-style: italic;
-    font-size: 0.9rem;
-  }
-
-  /* ── Redacted text effect ── */
-  .redacted {
-    background: var(--ink);
-    color: var(--ink);
-    user-select: none;
-  }
-
-  /* ── Reveal animation ── */
-  .reveal {
-    opacity: 0;
-    transform: translateY(10px);
-    animation: reveal 0.5s ease forwards;
-  }
-
-  @keyframes reveal {
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  /* ── Tabs ── */
-  .tabs {
-    display: flex;
-    gap: 0;
-    margin-bottom: 2px;
-  }
-
-  .tab {
-    background: #1a1208;
-    color: var(--faded);
-    border: none;
-    padding: 10px 24px;
-    font-family: 'Courier Prime', monospace;
-    font-size: 0.7rem;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    cursor: pointer;
-    border-bottom: 2px solid transparent;
-    transition: all 0.2s;
-  }
-
-  .tab:hover { color: var(--paper-dark); }
-  .tab.active { color: var(--paper); border-bottom-color: var(--red-stamp); }
-
-  .tab-content { display: none; }
-  .tab-content.active { display: block; }
-
-  /* ── Glitch title animation ── */
-  @keyframes glitch-1 {
-    0%, 100% { clip-path: inset(0 0 98% 0); transform: translate(-2px, 0); }
-    20% { clip-path: inset(30% 0 50% 0); transform: translate(2px, 0); }
-    40% { clip-path: inset(70% 0 10% 0); transform: translate(-1px, 0); }
-    60% { clip-path: inset(10% 0 80% 0); transform: translate(1px, 0); }
-    80% { clip-path: inset(50% 0 30% 0); transform: translate(0, 0); }
-  }
-
-  .hero {
-    text-align: center;
-    padding: 60px 0 50px;
-    position: relative;
-  }
-
-  .hero-title {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: clamp(4rem, 10vw, 9rem);
-    color: var(--paper);
-    letter-spacing: 0.05em;
-    line-height: 0.9;
-    position: relative;
-    display: inline-block;
-  }
-
-  .hero-title::before,
-  .hero-title::after {
-    content: attr(data-text);
-    position: absolute;
-    inset: 0;
-    color: var(--red-stamp);
-    opacity: 0;
-  }
-
-  .hero-title:hover::before {
-    opacity: 0.7;
-    animation: glitch-1 0.3s steps(1) infinite;
-  }
-
-  .hero-title:hover::after {
-    opacity: 0.5;
-    color: #4a8aff;
-    animation: glitch-1 0.3s steps(1) 0.05s infinite;
-  }
-
-  .hero-sub {
-    font-size: 0.7rem;
-    letter-spacing: 0.4em;
-    text-transform: uppercase;
-    color: var(--faded);
-    margin-top: 10px;
-  }
-
-  .api-url {
-    display: inline-block;
-    margin-top: 20px;
-    background: #1a1208;
-    border: 1px solid #2a2010;
-    color: var(--faded);
-    font-size: 0.75rem;
-    letter-spacing: 0.1em;
-    padding: 8px 20px;
-  }
-
-  .api-url span { color: var(--amber); }
-
-  /* scrollbar */
-  ::-webkit-scrollbar { width: 6px; }
-  ::-webkit-scrollbar-track { background: #0d0b07; }
-  ::-webkit-scrollbar-thumb { background: #2a2010; }
-
-  @media (max-width: 900px) {
-    .summary-grid { grid-template-columns: repeat(2, 1fr); }
-    .form-grid { grid-template-columns: 1fr 1fr; }
-    .locations-grid { grid-template-columns: repeat(2, 1fr); }
-    .scores-row { grid-template-columns: repeat(2, 1fr); }
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HAUNTED — Paranormal Registry</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;700;800&family=Syne+Mono&family=Syne:wght@400;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
 </head>
 <body>
+  <div class="noise"></div>
+  <div class="ink-splash splash-1"></div>
+  <div class="ink-splash splash-2"></div>
 
-<!-- Header -->
-<header class="site-header">
-  <div class="header-inner">
-    <div class="logo">
-      <span class="logo-main">HAUNTED</span>
-      <span class="logo-sub">Paranormal Registry v0.4.2</span>
+  <!-- SIDEBAR NAV -->
+  <nav class="sidebar">
+    <div class="sidebar-logo">
+      <span class="logo-jp">憑</span>
+      <span class="logo-en">HAUNTED</span>
     </div>
-    <div class="status-bar">
-      <span class="status-dot"></span>
-      <span id="conn-status">Connecting...</span>
-      <span>·</span>
-      <span id="ts"></span>
+    <ul class="nav-list">
+      <li><button class="nav-btn active" data-tab="overview">概要 <span>Overview</span></button></li>
+      <li><button class="nav-btn" data-tab="log">記録 <span>Log Event</span></button></li>
+      <li><button class="nav-btn" data-tab="events">事件 <span>Events</span></button></li>
+      <li><button class="nav-btn" data-tab="locations">場所 <span>Locations</span></button></li>
+      <li><button class="nav-btn" data-tab="register">登録 <span>Register</span></button></li>
+    </ul>
+    <div class="sidebar-status">
+      <div class="status-indicator" id="status-dot"></div>
+      <span id="status-text">connecting…</span>
     </div>
-  </div>
-</header>
+    <div class="sidebar-clock" id="sidebar-clock">--:--:--</div>
+  </nav>
 
-<!-- Classified banner -->
-<div class="classified-banner">
-  ████ FOR AUTHORIZED INVESTIGATORS ONLY ████ CLEARANCE LEVEL 4 REQUIRED ████
-</div>
+  <!-- MAIN -->
+  <main class="main">
 
-<div class="page">
+    <!-- ── OVERVIEW ── -->
+    <section class="tab-section active" id="tab-overview">
+      <div class="section-hero">
+        <div class="hero-eyebrow">PARANORMAL EVENT REGISTRY / v0.4.2</div>
+        <h1 class="hero-title">
+          <span class="title-line">THE</span>
+          <span class="title-line accent">UN<span class="title-hollow">KNOWN</span></span>
+        </h1>
+        <p class="hero-desc">A classification system for anomalous events. Log, analyze, and track paranormal activity across verified haunted locations worldwide.</p>
+      </div>
 
-  <!-- Hero -->
-  <div class="hero">
-    <div class="hero-title" data-text="THE UNKNOWN">THE UNKNOWN</div>
-    <div class="hero-sub">Paranormal Event Classification &amp; Analysis System</div>
-    <div class="api-url">API: <span>http://localhost:8000</span> &nbsp;·&nbsp; <span id="docs-link">docs /docs</span></div>
-  </div>
-
-  <!-- Summary -->
-  <div class="summary-grid" id="summary-grid">
-    <div class="stat-card"><div class="stat-label">Locations on file</div><div class="stat-value" id="stat-loc">—</div></div>
-    <div class="stat-card"><div class="stat-label">Events logged</div><div class="stat-value" id="stat-ev">—</div></div>
-    <div class="stat-card"><div class="stat-label">Verified</div><div class="stat-value" id="stat-ver">—</div></div>
-    <div class="stat-card"><div class="stat-label">Extreme threat</div><div class="stat-value danger" id="stat-ext">—</div></div>
-  </div>
-
-  <!-- Tabs -->
-  <div class="tabs">
-    <button class="tab active" onclick="switchTab('log')">Log Event</button>
-    <button class="tab" onclick="switchTab('events')">Events</button>
-    <button class="tab" onclick="switchTab('locations')">Locations</button>
-    <button class="tab" onclick="switchTab('register')">Register Location</button>
-  </div>
-
-  <!-- Tab: Log Event -->
-  <div class="tab-content active" id="tab-log">
-    <div class="panel">
-      <div class="form-grid">
-        <div class="form-group">
-          <label class="form-label">Location ID</label>
-          <input class="form-input" id="ev-locid" type="number" placeholder="1" min="1">
+      <div class="stats-strip" id="stats-strip">
+        <div class="stat-item">
+          <span class="stat-num" id="st-loc">—</span>
+          <span class="stat-label">Locations</span>
         </div>
-        <div class="form-group">
-          <label class="form-label">Title</label>
-          <input class="form-input" id="ev-title" type="text" placeholder="Object levitation in basement">
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <span class="stat-num" id="st-ev">—</span>
+          <span class="stat-label">Events filed</span>
         </div>
-        <div class="form-group">
-          <label class="form-label">Witnesses</label>
-          <input class="form-input" id="ev-witnesses" type="number" placeholder="0" min="0">
+        <div class="stat-divider"></div>
+        <div class="stat-item">
+          <span class="stat-num" id="st-ver">—</span>
+          <span class="stat-label">Verified</span>
         </div>
-        <div class="form-group">
-          <label class="form-label">Date & Time</label>
-          <input class="form-input" id="ev-date" type="datetime-local">
-        </div>
-        <div class="form-group" style="grid-column: span 2;">
-          <label class="form-label">Description</label>
-          <input class="form-input" id="ev-desc" type="text" placeholder="Detailed account of the incident...">
+        <div class="stat-divider"></div>
+        <div class="stat-item danger">
+          <span class="stat-num" id="st-ext">—</span>
+          <span class="stat-label">Extreme threat</span>
         </div>
       </div>
 
-      <div style="margin-bottom: 10px; font-size: 0.6rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--faded);">Activity Scores (0.0 — 1.0)</div>
-      <div class="scores-row">
-        <div class="score-group">
-          <div class="score-label">Kinetic</div>
-          <input class="score-slider" type="range" min="0" max="1" step="0.01" value="0" oninput="updateScore(this,'ks')">
-          <div class="score-display" id="ks">0.00</div>
-        </div>
-        <div class="score-group">
-          <div class="score-label">Visual</div>
-          <input class="score-slider" type="range" min="0" max="1" step="0.01" value="0" oninput="updateScore(this,'vs')">
-          <div class="score-display" id="vs">0.00</div>
-        </div>
-        <div class="score-group">
-          <div class="score-label">Thermal</div>
-          <input class="score-slider" type="range" min="0" max="1" step="0.01" value="0" oninput="updateScore(this,'ts-score')">
-          <div class="score-display" id="ts-score">0.00</div>
-        </div>
-        <div class="score-group">
-          <div class="score-label">Electronic</div>
-          <input class="score-slider" type="range" min="0" max="1" step="0.01" value="0" oninput="updateScore(this,'es')">
-          <div class="score-display" id="es">0.00</div>
-        </div>
-      </div>
-
-      <button class="btn-submit" onclick="submitEvent()" id="ev-btn">
-        FILE INCIDENT REPORT
-      </button>
-    </div>
-
-    <!-- Classification result -->
-    <div id="clf-result" style="display:none;"></div>
-  </div>
-
-  <!-- Tab: Events -->
-  <div class="tab-content" id="tab-events">
-    <div id="events-wrap">
-      <div class="empty"><span class="loader"></span> Loading dossiers...</div>
-    </div>
-  </div>
-
-  <!-- Tab: Locations -->
-  <div class="tab-content" id="tab-locations">
-    <div id="locations-wrap">
-      <div class="empty"><span class="loader"></span> Loading files...</div>
-    </div>
-  </div>
-
-  <!-- Tab: Register Location -->
-  <div class="tab-content" id="tab-register">
-    <div class="panel">
-      <div class="form-grid">
-        <div class="form-group">
-          <label class="form-label">Location Name</label>
-          <input class="form-input" id="loc-name" type="text" placeholder="Overtoun Bridge">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Latitude</label>
-          <input class="form-input" id="loc-lat" type="number" step="any" placeholder="55.9533">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Longitude</label>
-          <input class="form-input" id="loc-lon" type="number" step="any" placeholder="-4.4251">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Country Code</label>
-          <input class="form-input" id="loc-cc" type="text" placeholder="GBR" maxlength="3">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Address</label>
-          <input class="form-input" id="loc-addr" type="text" placeholder="Overtoun Estate, Dumbarton">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Notes</label>
-          <input class="form-input" id="loc-notes" type="text" placeholder="Initial assessment notes...">
-        </div>
-      </div>
-      <button class="btn-submit" onclick="submitLocation()">REGISTER LOCATION</button>
-    </div>
-  </div>
-
-</div><!-- /page -->
-
-<div class="toast-container" id="toasts"></div>
-
-<script>
-const API = 'http://localhost:8000';
-
-// ── Timestamp ──
-function tick() {
-  document.getElementById('ts').textContent = new Date().toUTCString().replace('GMT','UTC').slice(0,-4);
-}
-tick(); setInterval(tick, 1000);
-
-// ── Tab switching ──
-function switchTab(name) {
-  document.querySelectorAll('.tab').forEach((t,i) => t.classList.remove('active'));
-  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-  event.currentTarget.classList.add('active');
-  document.getElementById('tab-' + name).classList.add('active');
-  if (name === 'events') loadEvents();
-  if (name === 'locations') loadLocations();
-}
-
-// ── Score sliders ──
-function updateScore(el, id) {
-  document.getElementById(id).textContent = parseFloat(el.value).toFixed(2);
-}
-
-// ── Toast ──
-function toast(msg, type='success') {
-  const c = document.getElementById('toasts');
-  const t = document.createElement('div');
-  t.className = `toast ${type}`;
-  t.textContent = msg;
-  c.appendChild(t);
-  setTimeout(() => t.remove(), 4000);
-}
-
-// ── API helpers ──
-async function api(path, opts={}) {
-  try {
-    const r = await fetch(API + path, { headers: {'Content-Type':'application/json'}, ...opts });
-    if (!r.ok) { const e = await r.json().catch(()=>({detail:'Error'})); throw new Error(e.detail || r.status); }
-    return r.status === 204 ? null : r.json();
-  } catch(e) {
-    throw e;
-  }
-}
-
-// ── Load summary ──
-async function loadSummary() {
-  try {
-    const d = await api('/stats/summary');
-    document.getElementById('stat-loc').textContent = d.total_locations ?? '—';
-    document.getElementById('stat-ev').textContent = d.total_events ?? '—';
-    document.getElementById('stat-ver').textContent = d.verified_events ?? '—';
-    document.getElementById('stat-ext').textContent = d.extreme_threat_locations ?? '—';
-    document.getElementById('conn-status').textContent = 'Connected';
-  } catch {
-    document.getElementById('conn-status').textContent = 'API offline';
-    document.getElementById('conn-status').style.color = '#8b1a1a';
-  }
-}
-
-// ── Badge helper ──
-function classLabel(cls) {
-  return `<span class="badge badge-${cls}">${cls}</span>`;
-}
-
-function threatSkulls(level) {
-  const map = { BENIGN:1, LOW:2, MODERATE:3, HIGH:4, EXTREME:5 };
-  const n = map[level] || 1;
-  let h = '<span class="threat">';
-  for (let i=1;i<=5;i++) h += `<span class="threat-skull ${i<=n?'lit':''}">☠</span>`;
-  return h + '</span>';
-}
-
-// ── Load events ──
-async function loadEvents() {
-  const w = document.getElementById('events-wrap');
-  w.innerHTML = '<div class="empty"><span class="loader"></span> Retrieving dossiers...</div>';
-  try {
-    const evs = await api('/events?limit=30');
-    if (!evs.length) { w.innerHTML = '<div class="empty">No incidents on file.</div>'; return; }
-    const rows = evs.map(e => `
-      <tr class="reveal">
-        <td><span style="font-family:Bebas Neue;font-size:1.1rem;">#${e.id}</span></td>
-        <td style="max-width:220px;font-family:'Special Elite',cursive;">${e.title}</td>
-        <td>${classLabel(e.classification)}</td>
-        <td><span class="moon-tag">${e.moon_phase || '—'}</span></td>
-        <td>${e.witness_count}</td>
-        <td>${e.verified ? '<span class="badge" style="color:#2a5a1a;border-color:#2a5a1a;background:#e8f0e4;">VERIFIED</span>' : '<span class="badge" style="color:#4a4a4a;border-color:#4a4a4a;background:#ebebeb;">PENDING</span>'}</td>
-        <td style="font-size:0.75rem;color:var(--faded);">${new Date(e.occurred_at).toLocaleDateString()}</td>
-        <td>
-          ${!e.verified ? `<button onclick="verifyEvent(${e.id},this)" style="background:none;border:1px solid var(--faded);color:var(--faded);padding:3px 10px;font-family:'Courier Prime',monospace;font-size:0.65rem;cursor:pointer;letter-spacing:0.1em;">VERIFY</button>` : ''}
-        </td>
-      </tr>`).join('');
-    w.innerHTML = `<table class="events-table">
-      <thead><tr>
-        <th>#</th><th>Title</th><th>Class</th><th>Moon</th><th>Witnesses</th><th>Status</th><th>Date</th><th></th>
-      </tr></thead>
-      <tbody>${rows}</tbody>
-    </table>`;
-  } catch(e) {
-    w.innerHTML = `<div class="empty" style="color:var(--red);">Failed to load: ${e.message}</div>`;
-  }
-}
-
-// ── Load locations ──
-async function loadLocations() {
-  const w = document.getElementById('locations-wrap');
-  w.innerHTML = '<div class="empty"><span class="loader"></span> Loading location files...</div>';
-  try {
-    const locs = await api('/locations?limit=30');
-    if (!locs.length) { w.innerHTML = '<div class="empty">No locations registered.</div>'; return; }
-    const threatPct = {BENIGN:10, LOW:25, MODERATE:50, HIGH:75, EXTREME:100};
-    const cards = locs.map((l, i) => `
-      <div class="loc-card reveal" style="animation-delay:${i*0.05}s">
-        <div class="loc-id">FILE #${String(l.id).padStart(4,'0')} · ${l.country_code || 'UNK'}</div>
-        <div class="loc-name">${l.name}</div>
-        <div class="loc-meta">
-          <span>⚡ ${l.event_count} events</span>
-          <span>📍 ${l.latitude.toFixed(3)}, ${l.longitude.toFixed(3)}</span>
-          <span>${l.threat_level}</span>
-        </div>
-        <div class="loc-threat-bar"><div class="loc-threat-fill" style="width:${threatPct[l.threat_level]||10}%"></div></div>
-      </div>`).join('');
-    w.innerHTML = `<div class="locations-grid">${cards}</div>`;
-  } catch(e) {
-    w.innerHTML = `<div class="empty" style="color:var(--red);">Failed: ${e.message}</div>`;
-  }
-}
-
-// ── Submit event ──
-async function submitEvent() {
-  const btn = document.getElementById('ev-btn');
-  const sliders = document.querySelectorAll('.score-slider');
-  const scores = [...sliders].map(s => parseFloat(s.value));
-
-  const payload = {
-    location_id: parseInt(document.getElementById('ev-locid').value) || 1,
-    title: document.getElementById('ev-title').value.trim() || 'Unnamed incident',
-    description: document.getElementById('ev-desc').value.trim() || null,
-    occurred_at: document.getElementById('ev-date').value || new Date().toISOString().slice(0,16),
-    witness_count: parseInt(document.getElementById('ev-witnesses').value) || 0,
-    kinetic_score: scores[0],
-    visual_score: scores[1],
-    thermal_score: scores[2],
-    electronic_score: scores[3],
-    evidence: [],
-  };
-
-  btn.innerHTML = '<span class="loader"></span> FILING...';
-  btn.disabled = true;
-
-  try {
-    const ev = await api('/events', { method:'POST', body: JSON.stringify(payload) });
-    toast(`Incident #${ev.id} filed. Classification: ${ev.classification.toUpperCase()}`, 'success');
-
-    // Show classification result
-    const res = await api(`/events/${ev.id}/classify`);
-    const clfDiv = document.getElementById('clf-result');
-    clfDiv.style.display = 'block';
-    clfDiv.innerHTML = `
-      <div class="panel reveal" style="border-top:3px solid var(--red-stamp);">
-        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:20px;">
-          <div>
-            <div style="font-size:0.6rem;letter-spacing:0.3em;color:var(--faded);margin-bottom:6px;">CLASSIFICATION RESULT — EVENT #${ev.id}</div>
-            <div style="font-family:'Bebas Neue',sans-serif;font-size:2.5rem;color:var(--ink);line-height:1;">${res.classification.toUpperCase()}</div>
-            <div style="margin:10px 0 4px;">${threatSkulls(res.threat_level.toUpperCase())}</div>
-            <div style="font-size:0.75rem;color:var(--faded);margin-top:10px;font-style:italic;max-width:500px;">${res.reasoning}</div>
-          </div>
-          <div style="text-align:right;flex-shrink:0;">
-            <div class="stamp">${res.threat_level.toUpperCase()}</div>
-            <div style="font-size:0.65rem;color:var(--faded);margin-top:8px;">Confidence: ${(res.confidence*100).toFixed(1)}%</div>
-            <div style="font-size:0.65rem;color:var(--faded);">Moon: ${ev.moon_phase}</div>
+      <div class="overview-grid">
+        <div class="overview-card" id="recent-events-card">
+          <div class="card-header">Recent incidents</div>
+          <div class="card-body" id="recent-events-body">
+            <div class="loading-state"><span class="spinner"></span> Retrieving…</div>
           </div>
         </div>
-      </div>`;
+        <div class="overview-card">
+          <div class="card-header">Classification guide</div>
+          <div class="card-body">
+            <div class="clf-guide">
+              <div class="clf-row"><span class="badge badge-poltergeist">POLTERGEIST</span><span>Kinetic axis ≥ 0.6 — object movement, sounds</span></div>
+              <div class="clf-row"><span class="badge badge-apparition">APPARITION</span><span>Visual axis ≥ 0.6 — manifestations, shadows</span></div>
+              <div class="clf-row"><span class="badge badge-electrical">ELECTRICAL</span><span>Electronic axis ≥ 0.6 — EMF spikes, interference</span></div>
+              <div class="clf-row"><span class="badge badge-infrasound">INFRASOUND</span><span>Thermal + Kinetic — cold spots + movement</span></div>
+              <div class="clf-row"><span class="badge badge-intelligent">INTELLIGENT</span><span>Electronic + Visual — responsive entity</span></div>
+              <div class="clf-row"><span class="badge badge-unknown">UNKNOWN</span><span>Insufficient data for classification</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
 
-    loadSummary();
-  } catch(e) {
-    toast(`Error: ${e.message}`, 'error');
-  } finally {
-    btn.innerHTML = 'FILE INCIDENT REPORT';
-    btn.disabled = false;
-  }
-}
+    <!-- ── LOG EVENT ── -->
+    <section class="tab-section" id="tab-log">
+      <div class="section-header">
+        <span class="section-jp">記録</span>
+        <h2>File Incident Report</h2>
+      </div>
 
-// ── Verify event ──
-async function verifyEvent(id, btn) {
-  btn.textContent = '...';
-  try {
-    await api(`/events/${id}/verify`, { method:'PATCH' });
-    toast(`Event #${id} verified`, 'success');
-    loadEvents();
-    loadSummary();
-  } catch(e) {
-    toast(`Error: ${e.message}`, 'error');
-  }
-}
+      <div class="form-layout">
+        <div class="form-col">
+          <div class="field-group">
+            <label class="field-label">Location ID</label>
+            <input class="field-input" id="ev-locid" type="number" min="1" placeholder="1" />
+          </div>
+          <div class="field-group">
+            <label class="field-label">Title</label>
+            <input class="field-input" id="ev-title" type="text" placeholder="Object levitation in the east wing" />
+          </div>
+          <div class="field-group">
+            <label class="field-label">Description</label>
+            <textarea class="field-input field-textarea" id="ev-desc" placeholder="Detailed account of the incident…"></textarea>
+          </div>
+          <div class="field-row">
+            <div class="field-group">
+              <label class="field-label">Date &amp; Time</label>
+              <input class="field-input" id="ev-date" type="datetime-local" />
+            </div>
+            <div class="field-group">
+              <label class="field-label">Witnesses</label>
+              <input class="field-input" id="ev-witnesses" type="number" min="0" placeholder="0" />
+            </div>
+          </div>
+        </div>
 
-// ── Submit location ──
-async function submitLocation() {
-  const payload = {
-    name: document.getElementById('loc-name').value.trim(),
-    latitude: parseFloat(document.getElementById('loc-lat').value),
-    longitude: parseFloat(document.getElementById('loc-lon').value),
-    country_code: document.getElementById('loc-cc').value.trim().toUpperCase() || null,
-    address: document.getElementById('loc-addr').value.trim() || null,
-    notes: document.getElementById('loc-notes').value.trim() || null,
-    tags: [],
-  };
-  if (!payload.name || isNaN(payload.latitude) || isNaN(payload.longitude)) {
-    toast('Name, latitude and longitude required', 'error'); return;
-  }
-  try {
-    const loc = await api('/locations', { method:'POST', body: JSON.stringify(payload) });
-    toast(`Location #${loc.id} registered: ${loc.name}`, 'success');
-    loadSummary();
-  } catch(e) {
-    toast(`Error: ${e.message}`, 'error');
-  }
-}
+        <div class="form-col">
+          <div class="scores-panel">
+            <div class="scores-title">Activity Scores <span>( 0.0 — 1.0 )</span></div>
+            <div class="score-row">
+              <div class="score-axis">
+                <span class="axis-name">Kinetic</span>
+                <input class="score-range" type="range" min="0" max="1" step="0.01" value="0" id="sl-kinetic" oninput="updateScore('kinetic',this.value)" />
+                <span class="axis-val" id="val-kinetic">0.00</span>
+              </div>
+              <div class="score-axis">
+                <span class="axis-name">Visual</span>
+                <input class="score-range" type="range" min="0" max="1" step="0.01" value="0" id="sl-visual" oninput="updateScore('visual',this.value)" />
+                <span class="axis-val" id="val-visual">0.00</span>
+              </div>
+              <div class="score-axis">
+                <span class="axis-name">Thermal</span>
+                <input class="score-range" type="range" min="0" max="1" step="0.01" value="0" id="sl-thermal" oninput="updateScore('thermal',this.value)" />
+                <span class="axis-val" id="val-thermal">0.00</span>
+              </div>
+              <div class="score-axis">
+                <span class="axis-name">Electronic</span>
+                <input class="score-range" type="range" min="0" max="1" step="0.01" value="0" id="sl-electronic" oninput="updateScore('electronic',this.value)" />
+                <span class="axis-val" id="val-electronic">0.00</span>
+              </div>
+            </div>
+            <div class="score-preview" id="score-preview">
+              <div class="preview-bar" id="prev-kinetic" style="--w:0%"><span>KIN</span></div>
+              <div class="preview-bar" id="prev-visual" style="--w:0%"><span>VIS</span></div>
+              <div class="preview-bar" id="prev-thermal" style="--w:0%"><span>THR</span></div>
+              <div class="preview-bar" id="prev-electronic" style="--w:0%"><span>ELC</span></div>
+            </div>
+          </div>
+          <button class="btn-primary" id="ev-submit-btn" onclick="submitEvent()">
+            <span class="btn-text">FILE REPORT</span>
+            <span class="btn-arrow">→</span>
+          </button>
+        </div>
+      </div>
 
-// ── Set default datetime ──
-document.getElementById('ev-date').value = new Date().toISOString().slice(0,16);
+      <div class="clf-result-panel" id="clf-result" style="display:none"></div>
+    </section>
 
-// ── Boot ──
-loadSummary();
-</script>
+    <!-- ── EVENTS ── -->
+    <section class="tab-section" id="tab-events">
+      <div class="section-header">
+        <span class="section-jp">事件</span>
+        <h2>Incident Archive</h2>
+        <button class="btn-ghost" onclick="loadEvents()">↻ Refresh</button>
+      </div>
+      <div id="events-container">
+        <div class="loading-state"><span class="spinner"></span> Loading dossiers…</div>
+      </div>
+    </section>
+
+    <!-- ── LOCATIONS ── -->
+    <section class="tab-section" id="tab-locations">
+      <div class="section-header">
+        <span class="section-jp">場所</span>
+        <h2>Registered Locations</h2>
+        <button class="btn-ghost" onclick="loadLocations()">↻ Refresh</button>
+      </div>
+      <div id="locations-container">
+        <div class="loading-state"><span class="spinner"></span> Loading files…</div>
+      </div>
+    </section>
+
+    <!-- ── REGISTER LOCATION ── -->
+    <section class="tab-section" id="tab-register">
+      <div class="section-header">
+        <span class="section-jp">登録</span>
+        <h2>Register Location</h2>
+      </div>
+      <div class="form-layout">
+        <div class="form-col">
+          <div class="field-group">
+            <label class="field-label">Location Name</label>
+            <input class="field-input" id="loc-name" type="text" placeholder="Overtoun Bridge" />
+          </div>
+          <div class="field-row">
+            <div class="field-group">
+              <label class="field-label">Latitude</label>
+              <input class="field-input" id="loc-lat" type="number" step="any" placeholder="55.9533" />
+            </div>
+            <div class="field-group">
+              <label class="field-label">Longitude</label>
+              <input class="field-input" id="loc-lon" type="number" step="any" placeholder="-4.4251" />
+            </div>
+          </div>
+          <div class="field-row">
+            <div class="field-group">
+              <label class="field-label">Country Code</label>
+              <input class="field-input" id="loc-cc" type="text" maxlength="3" placeholder="GBR" />
+            </div>
+            <div class="field-group">
+              <label class="field-label">Address</label>
+              <input class="field-input" id="loc-addr" type="text" placeholder="Dumbarton, Scotland" />
+            </div>
+          </div>
+          <div class="field-group">
+            <label class="field-label">Notes</label>
+            <textarea class="field-input field-textarea" id="loc-notes" placeholder="Initial assessment notes…"></textarea>
+          </div>
+          <button class="btn-primary" onclick="submitLocation()">
+            <span class="btn-text">REGISTER</span>
+            <span class="btn-arrow">→</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <div class="toast-dock" id="toast-dock"></div>
+  <script src="js/app.js"></script>
 </body>
 </html>
