@@ -1,8 +1,9 @@
 from datetime import datetime
-from typing import Optional, List
-from pydantic import BaseModel, Field, field_validator
-from app.models.models import ThreatLevel, EventClass, InvestigatorRole
+from typing import List, Optional
 
+from pydantic import BaseModel, Field, field_validator
+
+from app.models.models import EventClass, InvestigatorRole, ThreatLevel
 
 # ── Location ──────────────────────────────────────────────────────────────────
 

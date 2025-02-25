@@ -4,6 +4,7 @@ Heatmap & geospatial analytics for haunted locations.
 
 import math
 from typing import List
+
 from app.schemas.schemas import Hotspot
 
 

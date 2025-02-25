@@ -11,7 +11,6 @@ Classifies events based on scored axes:
 from app.models.models import EventClass, ThreatLevel
 from app.schemas.schemas import ClassificationResult
 
-
 AXIS_LABELS = {
     "kinetic": "Kinetic activity",
     "visual": "Visual manifestation",

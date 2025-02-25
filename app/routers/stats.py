@@ -1,9 +1,11 @@
 from typing import List
+
 from fastapi import APIRouter, Depends, Query
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func
+
 from app.database import get_db
-from app.models.models import Location, Event, ThreatLevel
+from app.models.models import Event, Location, ThreatLevel
 from app.schemas.schemas import Hotspot, MoonPhaseStats
 from app.services.heatmap import cluster_hotspots
 
@@ -31,7 +33,7 @@ async def get_hotspots(
             func.max(Event.occurred_at).label("last_activity"),
         )
         .outerjoin(Event, Event.location_id == Location.id)
-        .where(Location.is_active == True)
+        .where(Location.is_active is True)
         .group_by(Location.id)
         .order_by(func.count(Event.id).desc())
         .limit(limit)
@@ -68,7 +70,7 @@ async def get_clusters(
             func.max(Event.occurred_at).label("last_activity"),
         )
         .outerjoin(Event, Event.location_id == Location.id)
-        .where(Location.is_active == True)
+        .where(Location.is_active is True)
         .group_by(Location.id)
     )
     result = await db.execute(q)
@@ -123,7 +125,7 @@ async def summary(db: AsyncSession = Depends(get_db)):
     loc_count = (await db.execute(select(func.count()).select_from(Location))).scalar()
     event_count = (await db.execute(select(func.count()).select_from(Event))).scalar()
     verified_count = (
-        await db.execute(select(func.count()).where(Event.verified == True))
+        await db.execute(select(func.count()).where(Event.verified is True))
     ).scalar()
     extreme_count = (
         await db.execute(

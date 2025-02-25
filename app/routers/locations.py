@@ -1,10 +1,12 @@
 from typing import List, Optional
+
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func
+
 from app.database import get_db
-from app.models.models import Location, Event, ThreatLevel
-from app.schemas.schemas import LocationCreate, LocationUpdate, LocationOut, EventOut
+from app.models.models import Event, Location, ThreatLevel
+from app.schemas.schemas import EventOut, LocationCreate, LocationOut, LocationUpdate
 
 router = APIRouter(prefix="/locations", tags=["Locations"])
 
@@ -22,7 +24,7 @@ async def list_locations(
     """List haunted locations with optional filters."""
     q = select(Location)
     if active_only:
-        q = q.where(Location.is_active == True)
+        q = q.where(Location.is_active is True)
     if country_code:
         q = q.where(Location.country_code == country_code.upper())
     if threat_level:

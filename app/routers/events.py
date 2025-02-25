@@ -1,12 +1,13 @@
-import math
 from datetime import datetime
 from typing import List, Optional
+
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.database import get_db
-from app.models.models import Event, Location, EventClass
-from app.schemas.schemas import EventCreate, EventOut, ClassificationResult
+from app.models.models import Event, EventClass, Location
+from app.schemas.schemas import ClassificationResult, EventCreate, EventOut
 from app.services.classifier import classify_event
 
 router = APIRouter(prefix="/events", tags=["Events"])

@@ -1,6 +1,5 @@
-import pytest
-from app.services.classifier import classify_event
 from app.models.models import EventClass, ThreatLevel
+from app.services.classifier import classify_event
 
 
 def test_poltergeist_classification():

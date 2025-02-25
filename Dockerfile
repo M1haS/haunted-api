@@ -4,12 +4,16 @@ WORKDIR /app
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
-    PIP_NO_CACHE_DIR=1
+    UV_SYSTEM_PYTHON=1 \
+    UV_NO_CACHE=1
 
-# ── deps layer ──
+# ── install uv ──
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+
+# ── deps layer (cached separately from code) ──
 FROM base AS deps
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+COPY pyproject.toml uv.lock ./
+RUN uv sync --frozen --no-dev
 
 # ── final image ──
 FROM deps AS final

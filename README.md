@@ -21,9 +21,14 @@ A REST API for cataloging, classifying and analyzing paranormal events and haunt
 ## Quick Start
 
 ```bash
-python -m venv venv && source venv/bin/activate
-pip install -r requirements.txt
-uvicorn app.main:app --reload
+# install uv if you don't have it
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# install deps and activate venv
+uv sync
+
+# run
+uv run uvicorn app.main:app --reload
 ```
 
 API docs: http://localhost:8000/docs
